@@ -18,6 +18,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         };
 
+        let pinnedRow = null; // Store the currently pinned row
+
+// Function to render the leaderboard, updated to handle pinned rows
+const renderLeaderboard = (data) => {
+    const leaderboardBody = document.getElementById('leaderboard-body');
+    leaderboardBody.innerHTML = '';
+
+    // Include the pinned row first if it exists
+    if (pinnedRow) {
+        const rowElement = createRowElement(pinnedRow, true);
+        leaderboardBody.appendChild(rowElement);
+    }
+
+    // Render the remaining rows, excluding the pinned row
+    data
+        .filter((item) => item !== pinnedRow)
+        .forEach((item) => {
+            const rowElement = createRowElement(item);
+            leaderboardBody.appendChild(rowElement);
+        });
+};
+
+// Function to create a row element and add click event
+const createRowElement = (row, isPinned = false) => {
+    const tr = document.createElement('tr');
+    tr.classList.add('cursor-pointer', isPinned ? 'bg-yellow-500' : 'hover:bg-gray-700'); // Highlight pinned row
+    tr.addEventListener('click', () => pinRow(row));
+
+    tr.innerHTML = `
+        <td class="p-4">${row.rank || 'N/A'}</td>
+        <td class="p-4">${row.rollNumber || 'N/A'}</td>
+        <td class="p-4">${row.name || 'N/A'}</td>
+        <td class="p-4">${row.section || 'N/A'}</td>
+        <td class="p-4">${row.totalSolved || 'N/A'}</td>
+        <td class="p-4 text-green-400">${row.easy || 'N/A'}</td>
+        <td class="p-4 text-yellow-400">${row.medium || 'N/A'}</td>
+        <td class="p-4 text-red-400">${row.hard || 'N/A'}</td>
+    `;
+
+    return tr;
+};
+
+// Function to pin a row
+const pinRow = (row) => {
+    if (pinnedRow === row) {
+        pinnedRow = null; // Unpin if the same row is clicked again
+    } else {
+        pinnedRow = row;
+    }
+    renderLeaderboard(filteredData); // Re-render the leaderboard
+};
+
+// Fetch data and initialize the leaderboard
+fetchData();
+
         // Function to export data to CSV
         const exportToCSV = (data) => {
             const headers = ['Rank', 'Roll Number', 'Name', 'Section', 'Total Solved', 'Easy', 'Medium', 'Hard', 'LeetCode URL'];
